@@ -1,101 +1,103 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'dart:math' as math;
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: MyApp(),
-  ));
+  runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Assignment',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const HomeScreen(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  @override
-  Color? pc1; // COLORS TO BE PASSED TO THE CONTAINERS  1
-  Color? pc2; // COLORS TO BE PASSED TO THE CONTAINERS 2
-  int x = 0;
-  int y = 1;
+class StatefulColorfulTile extends StatefulWidget {
+  const StatefulColorfulTile({Key? key}) : super(key: key);
 
+  @override
+  State<StatefulColorfulTile> createState() => _StatefulColorfulTileState();
+}
+
+class _StatefulColorfulTileState extends State<StatefulColorfulTile> {
+  Color? myColor;
+
+  @override
   void initState() {
+    myColor = Color(
+      (math.Random().nextDouble() * 0xFFFFFF).toInt(),
+    ).withOpacity(
+      1.0,
+    );
+
     super.initState();
-    pc1 = Colors.primaries[Random().nextInt(Colors.primaries.length)];
-    pc2 = Colors.primaries[Random().nextInt(Colors
-        .primaries.length)]; // USED RANDOM COLORIZATION IN THE INIT STATE :)
   }
 
+  @override
   Widget build(BuildContext context) {
-    var arr = [
-      reusablewidget(pc1),
-      reusablewidget(pc2)
-    ]; // ARRAY OF CONTAINERS AS YOU ASKED :)
-
-    void setstate() {
-      if (x == 1) {
-        x = 0;
-        y = 1; // function to swap two containers by changing the index in the array
-      } else {
-        x = 1;
-        y = 0;
-      }
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.blue[900],
-      appBar: AppBar(
-        title: Text(
-            'ARTICUNO CODING'), // TITLE FOR THE APP BAR  , IT MAKE THE APP LOOK LIKE AN APP
-      ),
-      body: Column(
-        children: [
-          Row(
-            children: <reusablewidget>[
-              arr[x],
-              arr[y]
-            ], // used the array of widget to swap the two container
-          ),
-          SizedBox(height: 300),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.indigo),
-            ),
-            onPressed: () {
-              setState(() {
-                // here is the swap button , could have made it better but it does the work
-                setstate();
-              });
-            },
-            child: Text(
-              'swap',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          )
-        ],
+    return Container(
+      color: myColor,
+      child: const Padding(
+        padding: EdgeInsets.all(70.0),
       ),
     );
   }
 }
 
-class reusablewidget extends StatelessWidget {
-  // I MADE THE NEW CLASS FOR THE CONTAINER BECAUSE IT WAS THE REPETATIVE PROCESS TO CREATE THEM AGAIN AND AGAIN
-  Color? color;
-  reusablewidget(this.color);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final containers = [
+    const Padding(
+      padding: EdgeInsets.all(10),
+      child: StatefulColorfulTile(
+        key: GlobalObjectKey(0), // CHANGES :)
+      ),
+    ),
+    const Padding(
+      // KEYS WERE NOT PRESENT SO WHENEVER THE WIDGET TREE CHANGES THE RELATIVE TREE THE CHANGES WERE NOT VISIBLE .
+      padding: EdgeInsets.all(10),
+      child: StatefulColorfulTile(
+        key: GlobalObjectKey(1), // CHANGES :)
+      ),
+    )
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void swapColour() {
+    setState(() {
+      containers.insert(1, containers.removeAt(0));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // I GAVE THE CONTAINERS A LITTLE BIT OF DECORATION HOPE YOU FIND WELL PRESENTED
-      margin: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        // this is the stateless container class
-        borderRadius: BorderRadius.circular(15),
-        color: color,
+    return Scaffold(
+      body: SafeArea(
+        child: Row(
+          children: containers,
+        ),
       ),
-      height: 180,
-      width: 150,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => swapColour(),
+        child: const Icon(Icons.change_circle_outlined),
+      ),
     );
   }
 }
